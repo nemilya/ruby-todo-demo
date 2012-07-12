@@ -12,6 +12,8 @@ end
 # обработка на нажатие `[Кнопка Добавить]` - 
 # добавление пункта, передаётся `'text'`
 post "/add" do
+  p "add route"
+  p params[:text]
   redirect "/"
 end
 
@@ -19,12 +21,15 @@ end
 # отметка о выполненнии, передаётся массив `'ids[]'`
 # передаётся `'text'`
 post "/done" do
+  p "done route"
+  p params[:ids]
   redirect "/"
 end
 
 # обработка на нажатие `[Кнопка Архивировать]` - 
 # удаление всех выполненных todo пунктов
 post "/archive" do
+  p "archive route"
   redirect "/"
 end
 
@@ -51,21 +56,28 @@ __END__
 
     h2. Актуальные
 
-    [текстовое поле] [Кнопка Добавить]
+    <form action="/add" method="post">
+      <input type="text" name="text">
+      <input type="submit" value="Добавить">
+    </form>
 
+    <form action="/done" method="post">
     // список todo пунктов, снизу вверх (по id)
-    [checkbox] [текст todo1]
-    [checkbox] [текст todo2]
+      <input type="checkbox" name="ids[]" value="2"> [текст todo1]
+      <input type="checkbox" name="ids[]" value="1"> [текст todo2]
     ...
-    [Кнопка Выполнены]
+      <input type="submit" value="Выполнены">
+    </form>
 
     h2. Выполненные
 
+    <form action="/archive" method="post">
     // список выполненных todo пунктов, 
     // с сортировкой снизу вверх (по id)
     // визуально перечёркнуты
     [текст done-todo1]
     [текст done-todo2]
     ...
-    [Кнопка Архивировать]
+      <input type="submit" value="Архивировать">
+    </form>
 </pre>
