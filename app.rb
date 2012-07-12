@@ -37,6 +37,7 @@ DataMapper.auto_upgrade!
 # отображение страницы
 get "/" do
   @todos = Todos.all(:is_done => false, :order => [:id.desc])
+  @done_todos = Todos.all(:is_done => true, :order => [:id.desc])
   erb :index
 end
 
@@ -56,6 +57,11 @@ end
 post "/done" do
   p "done route"
   p params[:ids]
+  if params[:ids]
+    params[:ids].each do |todo_id|
+      Todos.get(todo_id).update(:is_done => true)
+    end
+  end
   redirect "/"
 end
 
@@ -63,6 +69,7 @@ end
 # удаление всех выполненных todo пунктов
 post "/archive" do
   p "archive route"
+  Todos.all(:is_done => true).destroy
   redirect "/"
 end
 
@@ -94,6 +101,7 @@ __END__
       <input type="submit" value="Добавить">
     </form>
 
+<% if @todos.size > 0 %>
     <form action="/done" method="post">
     // список todo пунктов, снизу вверх (по id)
       <% @todos.each do |todo| %>
@@ -101,16 +109,19 @@ __END__
       <% end %>
       <input type="submit" value="Выполнены">
     </form>
+<% end %>
 
+<% if @done_todos.size > 0 %>
     h2. Выполненные
 
     <form action="/archive" method="post">
     // список выполненных todo пунктов, 
     // с сортировкой снизу вверх (по id)
     // визуально перечёркнуты
-    [текст done-todo1]
-    [текст done-todo2]
-    ...
+      <% @done_todos.each do |todo| %>
+        <del><%= todo.todo %></del>
+      <% end %>
       <input type="submit" value="Архивировать">
     </form>
+<% end %>
 </pre>
