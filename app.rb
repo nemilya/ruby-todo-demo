@@ -34,6 +34,15 @@ DataMapper.finalize
 DataMapper.auto_upgrade!
 
 
+# набор "функций-хелперов"
+# добавляем хелпер "h" для автоматического
+# преобразования html в безопасный для отображения html
+helpers do
+  def h(html_test)
+    Rack::Utils.escape_html(html_test)
+  end
+end
+
 # отображение страницы
 get "/" do
   @todos = Todos.all(:is_done => false, :order => [:id.desc])
@@ -91,36 +100,34 @@ __END__
 
 @@index
 
-<pre>
-    h1. Простое ToDo приложение
+<h1>Простое ToDo приложение</h1>
 
-    h2. Актуальные
+<h2>Актуальные</h2>
 
     <form action="/add" method="post">
       <input type="text" name="text">
       <input type="submit" value="Добавить">
     </form>
+    <br />
 
 <% if @todos.size > 0 %>
     <form action="/done" method="post">
-    // список todo пунктов, снизу вверх (по id)
       <% @todos.each do |todo| %>
-      <input type="checkbox" name="ids[]" value="<%= todo.id %>"> <%= todo.todo %>
+      <input type="checkbox" name="ids[]" value="<%= todo.id %>"> <%= h todo.todo %><br />
       <% end %>
+      <br />
       <input type="submit" value="Выполнены">
     </form>
 <% end %>
 
 <% if @done_todos.size > 0 %>
-    h2. Выполненные
+<h2>Выполненные</h2>
 
     <form action="/archive" method="post">
-    // список выполненных todo пунктов, 
-    // с сортировкой снизу вверх (по id)
-    // визуально перечёркнуты
       <% @done_todos.each do |todo| %>
-        <del><%= todo.todo %></del>
+        <del><%= h todo.todo %></del><br />
       <% end %>
+      <br />
       <input type="submit" value="Архивировать">
     </form>
 <% end %>
