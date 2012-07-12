@@ -1,19 +1,24 @@
-# Простое ToDo приложение
-# на базе Ruby/Sinatra/DataMapper
+# Простое ToDo приложение на базе Ruby/Sinatra/DataMapper 
 #
+# [github][src], [демо][demo]
 #
-require "rubygems"
-require "sinatra"
+# [src]: https://github.com/nemilya/ruby-todo-demo
+# [demo]: http://jashkenas.github.com/docco/
 
+# подключение Sinatra и DataMapper библиотек
+require "rubygems"
+
+require "sinatra"
 require 'dm-core'
 require 'dm-migrations'
 
 # Таблица
-# 
-# todos
-# - id [integer]
-# - todo [string]
-# - is_done [boolean]
+# <pre>
+#    todos
+#    * id [integer]
+#    * todo [string]
+#    * is_done [boolean]
+# </pre>
 
 class Todos
   include DataMapper::Resource
@@ -25,9 +30,10 @@ end
 # для тестовых задач - настраиваем на БД Sqlite3
 conn_string = "sqlite3://#{Dir.pwd}/todos.db"
 
-# при выкладывании на CloudFoundry, и подключённом сервисе MySQL
-# необходимо проинициализировать данные доступа к БД
-# ENV['VCAP_SERVICES'] - переменная окружения проинициализированная CloudFoundry сервисом
+# при выкладывании на CloudFoundry (там приложение автоматически запускается в режиме `production`,
+# и подключённом сервисе MySQL 
+# необходимо проинициализировать данные доступа к БД 
+# `ENV['VCAP_SERVICES']` - переменная окружения проинициализированная CloudFoundry сервисом 
 configure :production do
   if ENV['VCAP_SERVICES']
     require "json"
@@ -41,44 +47,38 @@ configure :production do
   end
 end
 
-# инициализируем DataMapper на адаптер Базы Данных
+# инициализируем DataMapper на адаптер Базы Данных:
 DataMapper.setup(:default, conn_string)
 
-# обработка моделей
+# обработка модели:
 DataMapper.finalize
 
-# автоматическая миграция, если
-# изменились поля в модели
+# автоматическая миграция, если изменились поля в модели:
 DataMapper.auto_upgrade!
 
 
-# набор "функций-хелперов"
-# добавляем хелпер "h" для автоматического
-# преобразования html в безопасный для отображения html
+# набор "функций-хелперов" добавляем хелпер "h" для автоматического преобразования html в безопасный для отображения html:
 helpers do
   def h(html_test)
     Rack::Utils.escape_html(html_test)
   end
 end
 
-# отображение страницы
+# отображение страницы:
 get "/" do
   @todos = Todos.all(:is_done => false, :order => [:id.desc])
   @done_todos = Todos.all(:is_done => true, :order => [:id.desc])
   erb :index
 end
 
-# обработка на нажатие `[Кнопка Добавить]` - 
-# добавление пункта, передаётся `'text'`
+# обработка на нажатие `[Кнопка Добавить]` -  добавление пункта, передаётся `'text'`:
 post "/add" do
   todo = Todos.new(:todo => params[:text])
   todo.save
   redirect "/"
 end
 
-# обработка на нажатие `[Кнопка Выполнены]` - 
-# отметка о выполненнии, передаётся массив `'ids[]'`
-# передаётся `'text'`
+# обработка на нажатие `[Кнопка Выполнены]` - отметка о выполнении, передаётся массив `'ids[]'`:
 post "/done" do
   if params[:ids]
     params[:ids].each do |todo_id|
@@ -88,15 +88,50 @@ post "/done" do
   redirect "/"
 end
 
-# обработка на нажатие `[Кнопка Архивировать]` - 
-# удаление всех выполненных todo пунктов
+# обработка на нажатие `[Кнопка Архивировать]` -  удаление всех выполненных todo пунктов:
 post "/archive" do
   Todos.all(:is_done => true).destroy
   redirect "/"
 end
 
+# в Sinatra возможно встраивать шаблоны в программу, 
+# окончание программы определяется по `__END__`
+# далее идут шаблоны, название шаблона указывается после `@@`
 
 __END__
+
+#
+# шаблоны отображения:
+#
+# `layout` - внешний шаблон,
+#
+# `index` - главная страница.
+#
+# согласно постановке:
+# <pre>
+#    h1. Простое ToDo приложение
+#
+#    h2. Актуальные
+#
+#    [текстовое поле] [Кнопка Добавить]
+#
+#    // список todo пунктов, снизу вверх (по id)
+#    [checkbox] [текст todo1]
+#    [checkbox] [текст todo2]
+#    ...
+#    [Кнопка Выполнены]
+#
+#    h2. Выполненные
+#
+#    // список выполненных todo пунктов, 
+#    // с сортировкой снизу вверх (по id)
+#    // визуально перечёркнуты
+#    [текст done-todo1]
+#    [текст done-todo2]
+#    ...
+#    [Кнопка Архивировать]
+# </pre>
+
 
 @@layout
 
@@ -112,8 +147,10 @@ __END__
     <br />
     <small>
       github:
-        <a href="https://github.com/nemilya/ruby-todo-demo">source code</a> |
-        <a href="https://github.com/nemilya/ruby-todo-demo/blob/master/spec.ru.md">docs</a>
+        <a href="https://github.com/nemilya/ruby-todo-demo">исходны код</a> |
+        <a href="https://github.com/nemilya/ruby-todo-demo/blob/master/spec.ru.md">постановка</a> |
+        <a href="http://nemilya.github.com/ruby-todo-demo/app.html">описание</a>
+        
     </small>
   </body>
 </html>
