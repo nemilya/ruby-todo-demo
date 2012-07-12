@@ -11,6 +11,7 @@
  * [шаг 5 (окончательный)](https://github.com/nemilya/ruby-todo-demo/commit/19f6bbae6095b6573ddccb231f0b765c97c26568)
  * [развёртывание на CloudFoundry](https://github.com/nemilya/ruby-todo-demo/commit/326cd9dc81f24bf6b5391e9b6f1de9bb48d1f975)
  * [демо](http://ruby-todo-demo.cloudfoundry.com/)
+ * [документация](http://nemilya.github.com/ruby-todo-demo/app.html)
 
 
 (с) MIT License
