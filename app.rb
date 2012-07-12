@@ -3,9 +3,40 @@
 require "rubygems"
 require "sinatra"
 
+require 'dm-core'
+require 'dm-migrations'
+
+# Таблица
+# 
+# todos
+# - id [integer]
+# - todo [string]
+# - is_done [boolean]
+
+class Todos
+  include DataMapper::Resource
+  property :id, Serial, :key => true
+  property :todo, String
+  property :is_done, Boolean, :default=>false
+end
+
+# для тестовых задач - настраиваем на БД Sqlite3
+conn_string="sqlite3://#{Dir.pwd}/todos.db"
+
+# инициализируем DataMapper на адаптер Базы Данных
+DataMapper.setup(:default, conn_string)
+
+# обработка моделей
+DataMapper.finalize
+
+# автоматическая миграция, если
+# изменились поля в модели
+DataMapper.auto_upgrade!
+
 
 # отображение страницы
 get "/" do
+  @todos = Todos.all(:is_done => false, :order => [:id.desc])
   erb :index
 end
 
@@ -14,6 +45,8 @@ end
 post "/add" do
   p "add route"
   p params[:text]
+  todo = Todos.new(:todo => params[:text])
+  todo.save
   redirect "/"
 end
 
@@ -63,9 +96,9 @@ __END__
 
     <form action="/done" method="post">
     // список todo пунктов, снизу вверх (по id)
-      <input type="checkbox" name="ids[]" value="2"> [текст todo1]
-      <input type="checkbox" name="ids[]" value="1"> [текст todo2]
-    ...
+      <% @todos.each do |todo| %>
+      <input type="checkbox" name="ids[]" value="<%= todo.id %>"> <%= todo.todo %>
+      <% end %>
       <input type="submit" value="Выполнены">
     </form>
 
