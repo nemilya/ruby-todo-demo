@@ -3,7 +3,7 @@
 # [github][src], [демо][demo]
 #
 # [src]: https://github.com/nemilya/ruby-todo-demo
-# [demo]: http://jashkenas.github.com/docco/
+# [demo]: http://ruby-todo-demo.cloudfoundry.com
 
 # подключение Sinatra и DataMapper библиотек
 require "rubygems"
